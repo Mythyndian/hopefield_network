@@ -26,8 +26,7 @@ python main.py
 
 Contributors names and contact info
 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+Maciej Zawistowski - [@Mythyndian](https://github.com/Mythyndian)
 
 ## License
 
