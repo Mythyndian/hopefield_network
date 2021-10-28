@@ -10,11 +10,20 @@ def reset(tiles : list):
         tile.value = 0
 
 
-def save(tiles : list, vectors : list):
+def add_as_vector(tiles : list, vectors : list):
     vector = np.zeros(64)
     for tile in tiles:
         vector[tile.id] = tile.value
     vectors.append(vector)
+
+
+def add_as_test_vector(tiles : list, test_vectors : list):
+    vector = np.zeros(64)
+    
+    for tile in tiles:
+        vector[tile.id] = tile.value
+    test_vectors.append(vector)
+    # print(test_vector[0])
 
 
 def vector_negative(vector) -> np.array:
@@ -33,16 +42,17 @@ def display_vector(vector, tiles):
             tiles[i].change_color()
 
 
-def run(vectors : list, test_vector : np.array):
+def run(vectors : list, test_vectors : list):
     weight_matrix = calculate_weight_matrix(*vectors)
-    pre_activation_vector = np.matmul(weight_matrix, test_vector)
-    post_activation_vector = activation_function(pre_activation_vector)
-    reset(buttons)
-    t.sleep(3)
-    display_vector(post_activation_vector, buttons)
+    for vt in test_vectors:
+        pre_activation_vector = np.matmul(weight_matrix, vt)
+        post_activation_vector = activation_function(pre_activation_vector, vt)
+        reset(buttons)
+        display_vector(post_activation_vector, buttons)
+        print(post_activation_vector) # for debugging purpose
+        t.sleep(3)
 
-
-def display_ui(buttons, vectors):
+def display_ui(buttons, vectors, test_vector):
     root = tk.Tk()
     root.title("Symbol picker")
 
@@ -56,15 +66,18 @@ def display_ui(buttons, vectors):
             button.bind('<Button-1>', buttons[button_number].change_color)
             button_number += 1
     frame = tk.Frame(root)
-    save_button = tk.Button(text='Save', width=4, height=2, command=lambda: save(buttons, vectors))
+    add_as_vector_button = tk.Button(text='Add as vector', width=8, height=2, command=lambda: add_as_vector(buttons, vectors))
+    add_as_test_vector_button = tk.Button(text='Add as test vector', width=11, height=2, command=lambda: add_as_test_vector(buttons, test_vector))
     reset_button = tk.Button(text='Reset', width=4, height=2, command=lambda: reset(buttons))
-    run_button = tk.Button(text='Run', width=4, height=2, command=lambda: run(vectors, vector_negative(vectors[0])))
-    save_button.config(relief='solid', borderwidth=1)
+    run_button = tk.Button(text='Run', width=3, height=2, command=lambda: run(vectors, test_vectors))
+    add_as_vector_button.config(relief='solid', borderwidth=1)
+    add_as_test_vector_button.config(relief='solid', borderwidth=1)
     reset_button.config(relief='solid', borderwidth=1)
     run_button.config(relief='solid', borderwidth=1)
-    save_button.grid(row=8, column=1, columnspan=2)
-    reset_button.grid(row=8, column=3, columnspan=2)
-    run_button.grid(row=8, column=5, columnspan=2)
+    add_as_vector_button.grid(row=8, column=0, columnspan=2)
+    add_as_test_vector_button.grid(row=8, column=2, columnspan=3 )
+    reset_button.grid(row=8, column=5, columnspan=2)
+    run_button.grid(row=8, column=7, columnspan=2)
     root.mainloop()
 
 
@@ -84,14 +97,14 @@ def calculate_weight_matrix(*argv) -> np.array:
     return matrix
 
 
-def activation_function(vector: np.array) -> np.array:
+def activation_function(vector: np.array, test_vector : np.array) -> np.array:
     result = []
-    for x in vector:
-        if x > 0:
+    for p, t in zip(vector, test_vector):
+        if p > 0:
             result.append(1)
-        if x == 0:
-            result.append(x)
-        if x < 0:
+        if p == 0:
+            result.append(t)
+        if p < 0:
             result.append(0)
     result = np.array(result)
     return result
@@ -99,4 +112,5 @@ def activation_function(vector: np.array) -> np.array:
 
 vectors = []
 buttons = []
-display_ui(buttons, vectors)
+test_vectors = []
+display_ui(buttons, vectors, test_vectors)
